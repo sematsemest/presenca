@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Presença · XXVI SEMAT e XVI SEMEST</title>
+<link rel="icon" href="data:,">
+<meta charset="utf-8">
+<style>
+  :root {
+    --tinta: #7A004B;        /* vinho da identidade do evento */
+    --tinta-clara: #9E2C70;
+    --fundo: #ECECEC;        /* cinza da arte */
+    --carta: #FFFFFF;
+    --texto: #151214;
+    --suave: #5E525A;
+    --borda: #D6CDD2;
+    --ok: #0E6E5C;
+    --ok-fundo: #E4F1ED;
+    --alerta: #C62828;
+    --alerta-fundo: #FDECEA;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--fundo);
+    color: var(--texto);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .topo { background: var(--tinta); color: #fff; padding: 22px 20px 24px; }
+  .evento { font-size: 13px; letter-spacing: .04em; text-transform: uppercase;
+          color: #E2B9D2; margin: 0 0 6px; }
+  .palestra { font-size: 22px; font-weight: 600; line-height: 1.25; margin: 0; }
+  .detalhe { font-size: 14px; color: #E2B9D2; margin: 8px 0 0; }
+
+  main { padding: 20px 16px 48px; max-width: 32rem; margin: 0 auto; }
+
+  .cartao {
+    background: var(--carta);
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    padding: 20px 18px;
+  }
+
+  h2 { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+  .ajuda { font-size: 14px; color: var(--suave); margin: 0 0 20px; }
+
+  label { display: block; font-size: 14px; font-weight: 600; margin: 0 0 6px; }
+  .campo { margin-bottom: 18px; }
+
+  input, select {
+    width: 100%;
+    height: 52px;
+    padding: 0 14px;
+    font-size: 18px;
+    font-family: inherit;
+    color: var(--texto);
+    background: #fff;
+    border: 1.5px solid var(--borda);
+    border-radius: 8px;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  select { padding-right: 40px; background-image: none; }
+  input:focus, select:focus {
+    outline: 3px solid rgba(122, 0, 75, .28);
+    outline-offset: 1px;
+    border-color: var(--tinta-clara);
+  }
+  input.numero { font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+
+  /* estado de erro do campo */
+  input.invalido { border-color: var(--alerta); }
+  input.valido { border-color: var(--ok); }
+  .erroCampo {
+    display: none;
+    font-size: 14px;
+    color: var(--alerta);
+    margin: 6px 0 0;
+  }
+  .erroCampo.visivel { display: block; }
+
+  button {
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 16px;
+    font-size: 17px;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    border-radius: 8px;
+    background: var(--tinta);
+    color: #fff;
+    cursor: pointer;
+  }
+  button:disabled { opacity: .55; cursor: default; }
+  button:focus-visible { outline: 3px solid rgba(122, 0, 75, .45); outline-offset: 2px; }
+  button.secundario {
+    background: #fff; color: var(--tinta);
+    border: 1.5px solid var(--borda); margin-top: 10px;
+  }
+  button.confirmar { background: var(--ok); }
+
+  a.botaoLink {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 16px;
+    font-size: 17px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    background: var(--tinta);
+    color: #fff;
+  }
+  a.botaoLink:focus-visible { outline: 3px solid rgba(122, 0, 75, .45); outline-offset: 2px; }
+
+  .cracha {
+    border-left: 5px solid var(--tinta-clara);
+    background: #FAF4F8;
+    border-radius: 6px;
+    padding: 18px;
+    margin: 0 0 20px;
+  }
+  .cracha .rotulo { font-size: 14px; color: var(--suave); margin: 0 0 6px; }
+  .cracha .nome {
+    font-size: 26px; font-weight: 600; color: var(--tinta);
+    line-height: 1.2; margin: 0;
+  }
+  .cracha.feito { border-left-color: var(--ok); background: var(--ok-fundo); }
+  .cracha.feito .nome { color: var(--ok); }
+
+  .aviso { border-radius: 8px; padding: 14px 16px; font-size: 15px; margin: 0 0 18px; }
+  .aviso.erro { background: var(--alerta-fundo); color: var(--alerta); }
+  .aviso.neutro { background: #F3EAF0; color: var(--tinta); }
+
+  .oculto { display: none; }
+  .carregando { text-align: center; color: var(--suave); padding: 28px 0; }
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <p class="evento" id="nomeEvento"></p>
+  <h1 class="palestra" id="tituloPalestra">Lista de presença</h1>
+  <p class="detalhe" id="detalhePalestra"></p>
+</header>
+
+<main>
+  <!-- 1. Busca -->
+  <section class="cartao" id="telaBusca">
+    <h2>Confirme sua presença</h2>
+    <p class="ajuda" id="ajudaBusca"></p>
+
+    <div id="avisoBusca"></div>
+
+    <div class="campo">
+      <label for="cpf">CPF</label>
+      <input id="cpf" class="numero" inputmode="numeric" autocomplete="off"
+             maxlength="14" placeholder="000.000.000-00">
+      <p class="erroCampo" id="erroCpf"></p>
+    </div>
+
+    <div class="campo" id="campoEmail">
+      <label for="email">E-mail usado na inscrição</label>
+      <input id="email" type="email" inputmode="email" autocomplete="email"
+             autocapitalize="off" spellcheck="false" placeholder="nome@exemplo.com">
+      <p class="erroCampo" id="erroEmail"></p>
+    </div>
+
+    <button id="btnBuscar">Buscar meu cadastro</button>
+  </section>
+
+  <!-- 2. Conferência -->
+  <section class="cartao oculto" id="telaConferir">
+    <h2>É você?</h2>
+    <p class="ajuda">Mostramos o nome parcial para proteger seus dados.</p>
+    <div id="avisoConferir"></div>
+    <div class="cracha">
+      <p class="rotulo">Cadastro localizado</p>
+      <p class="nome" id="nomeParcial"></p>
+    </div>
+    <button id="btnConfirmar" class="confirmar">Sim, registrar minha presença</button>
+    <button id="btnNaoSouEu" class="secundario">Não sou eu, corrigir dados</button>
+  </section>
+
+  <!-- 3. Concluído -->
+  <section class="cartao oculto" id="telaPronto">
+    <div class="cracha feito">
+      <p class="rotulo" id="rotuloPronto">Presença registrada</p>
+      <p class="nome" id="nomePronto"></p>
+    </div>
+    <p class="ajuda" id="detalhePronto"></p>
+    <button id="btnOutro" class="secundario">Registrar outra pessoa</button>
+  </section>
+
+  <!-- 4. Não encontrado: encaminha ao formulário de inscrição -->
+  <section class="cartao oculto" id="telaCadastro">
+    <h2>Cadastro não encontrado</h2>
+    <p class="ajuda">Não achamos esse CPF na lista de inscritos do evento.</p>
+
+    <div class="aviso neutro">
+      <strong>Ainda não se inscreveu?</strong> Faça a inscrição pelo formulário oficial.
+      Leva dois minutos. Depois volte a esta página e busque seu CPF de novo.
+    </div>
+
+    <a id="btnInscrever" class="botaoLink" target="_blank" rel="noopener">Abrir formulário de inscrição</a>
+    <button id="btnBuscarDeNovo" class="secundario">Já me inscrevi, buscar de novo</button>
+    <button id="btnVoltar" class="secundario">Corrigir o CPF digitado</button>
+
+    <p class="ajuda" style="margin-top:18px">Se você tem certeza de que já se inscreveu e o
+      CPF está certo, procure a organização do evento.</p>
+  </section>
+
+  <!-- 5. Bloqueio -->
+  <section class="cartao oculto" id="telaBloqueio">
+    <div class="aviso erro" id="textoBloqueio"></div>
+  </section>
+
+  <div class="carregando oculto" id="carregando">Consultando…</div>
+</main>
+
+<script>
+  /* ===== CONFIGURAÇÃO DA PÁGINA EXTERNA ===== */
+  // URL /exec do Apps Script publicado como aplicativo web (acesso: qualquer pessoa).
+  var API_URL = 'https://script.google.com/macros/s/AKfycbyH7tgMx5hhfPnVIqkgGV8A5ag-pbBbg7VizQ89MpMDxIx_xRYOBqD-4jmTEqrzY5ZQbA/exec';
+
+  var params = new URLSearchParams(location.search);
+  var DADOS = {
+    palestraId: (params.get('p') || '').trim(),
+    token: (params.get('t') || '').trim(),
+    evento: '', exigeEmail: false, urlInscricao: '', palestra: null, erro: ''
+  };
+  var tokenAtual = null;
+  var el = function (id) { return document.getElementById(id); };
+
+  /**
+   * Chama o Apps Script. O corpo vai como text/plain para o navegador não
+   * exigir preflight CORS; o Apps Script responde com um redirecionamento
+   * que o fetch segue sozinho.
+   */
+  function api(dados) {
+    dados.p = DADOS.palestraId;
+    dados.t = DADOS.token;
+    return fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(dados)
+    }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    });
+  }
+
+  /* identificador local do aparelho, usado só para limitar tentativas */
+  var clienteId = localStorage.getItem('presencaClienteId');
+  if (!clienteId) {
+    clienteId = String(Date.now()) + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem('presencaClienteId', clienteId);
+  }
+
+  /* ---------- cabeçalho e campos condicionais ---------- */
+  function aplicarCabecalho() {
+    el('nomeEvento').textContent = DADOS.evento || '';
+    if (DADOS.palestra) {
+      el('tituloPalestra').textContent = DADOS.palestra.titulo || 'Lista de presença';
+      el('detalhePalestra').textContent =
+        [DADOS.palestra.palestrante, DADOS.palestra.local, DADOS.palestra.horario]
+          .filter(function (p) { return p; }).join(' · ');
+    }
+    el('ajudaBusca').textContent = DADOS.exigeEmail
+      ? 'Os dois campos são necessários para localizar seu cadastro.'
+      : 'Informe o CPF cadastrado na inscrição.';
+    el('campoEmail').classList.toggle('oculto', !DADOS.exigeEmail);
+    if (DADOS.urlInscricao) el('btnInscrever').href = DADOS.urlInscricao;
+
+    if (DADOS.erro) {
+      mostrar('telaBloqueio');
+      el('textoBloqueio').textContent = DADOS.erro;
+    } else {
+      mostrar('telaBusca');
+    }
+  }
+
+  function carregarAtividade() {
+    if (!DADOS.palestraId) {
+      DADOS.erro = 'Este link não indica qual atividade. Use o QR code da porta da sala.';
+      return aplicarCabecalho();
+    }
+    if (API_URL.indexOf('COLE_AQUI') === 0) {
+      DADOS.erro = 'A página ainda não está configurada: falta a URL do Apps Script.';
+      return aplicarCabecalho();
+    }
+    el('carregando').classList.remove('oculto');
+    el('telaBusca').classList.add('oculto');
+    api({ acao: 'atividade' }).then(function (r) {
+      el('carregando').classList.add('oculto');
+      DADOS.evento = r.evento || '';
+      DADOS.exigeEmail = !!r.exigeEmail;
+      DADOS.urlInscricao = r.urlInscricao || '';
+      DADOS.palestra = r.palestra || null;
+      DADOS.erro = r.status === 'ok' ? '' : (r.mensagem || 'Não foi possível carregar a atividade.');
+      aplicarCabecalho();
+    }).catch(function () {
+      el('carregando').classList.add('oculto');
+      DADOS.erro = 'Sem conexão com o servidor. Verifique a internet e recarregue a página.';
+      aplicarCabecalho();
+    });
+  }
+
+  /* ---------- validação do CPF (mesmos dígitos verificadores do servidor) ---------- */
+  function cpfValido(valor) {
+    var d = String(valor || '').replace(/\D/g, '');
+    if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+    var soma = 0, r, i;
+    for (i = 0; i < 9; i++) soma += Number(d[i]) * (10 - i);
+    r = (soma * 10) % 11; if (r === 10) r = 0;
+    if (r !== Number(d[9])) return false;
+    soma = 0;
+    for (i = 0; i < 10; i++) soma += Number(d[i]) * (11 - i);
+    r = (soma * 10) % 11; if (r === 10) r = 0;
+    return r === Number(d[10]);
+  }
+
+  function marcarErro(campoId, erroId, texto) {
+    el(campoId).classList.add('invalido');
+    el(campoId).classList.remove('valido');
+    el(campoId).setAttribute('aria-invalid', 'true');
+    el(erroId).textContent = texto;
+    el(erroId).classList.add('visivel');
+  }
+  function marcarOk(campoId, erroId, verde) {
+    el(campoId).classList.remove('invalido');
+    el(campoId).classList.toggle('valido', !!verde);
+    el(campoId).removeAttribute('aria-invalid');
+    el(erroId).classList.remove('visivel');
+  }
+
+  /** Confere ao sair do campo; enquanto digita, apenas limpa o erro anterior. */
+  function vigiarCpf(campoId, erroId) {
+    var campo = el(campoId);
+    campo.addEventListener('blur', function () {
+      var d = campo.value.replace(/\D/g, '');
+      if (!d.length) return marcarOk(campoId, erroId, false);
+      if (d.length < 11) return marcarErro(campoId, erroId, 'O CPF tem 11 números; você digitou ' + d.length + '.');
+      if (!cpfValido(d)) return marcarErro(campoId, erroId, 'Esse CPF não existe. Confira os números digitados.');
+      marcarOk(campoId, erroId, true);
+    });
+    campo.addEventListener('input', function () {
+      if (campo.classList.contains('invalido')) marcarOk(campoId, erroId, false);
+    });
+  }
+  function vigiarEmail(campoId, erroId) {
+    var campo = el(campoId);
+    campo.addEventListener('blur', function () {
+      var v = campo.value.trim();
+      if (!v.length) return marcarOk(campoId, erroId, false);
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) {
+        return marcarErro(campoId, erroId, 'E-mail incompleto. Confira o endereço.');
+      }
+      marcarOk(campoId, erroId, true);
+    });
+    campo.addEventListener('input', function () {
+      if (campo.classList.contains('invalido')) marcarOk(campoId, erroId, false);
+    });
+  }
+
+  /* ---------- máscara do CPF ---------- */
+  function mascaraCpf(v) {
+    var d = v.replace(/\D/g, '').slice(0, 11);
+    if (d.length > 9) return d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6,9)+'-'+d.slice(9);
+    if (d.length > 6) return d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6);
+    if (d.length > 3) return d.slice(0,3)+'.'+d.slice(3);
+    return d;
+  }
+  ['cpf'].forEach(function (id) {
+    el(id).addEventListener('input', function () { el(id).value = mascaraCpf(el(id).value); });
+  });
+
+  vigiarCpf('cpf', 'erroCpf');
+  vigiarEmail('email', 'erroEmail');
+
+  /* ---------- telas ---------- */
+  var TELAS = ['telaBusca', 'telaConferir', 'telaPronto', 'telaCadastro', 'telaBloqueio'];
+  function mostrar(id) {
+    TELAS.forEach(function (t) { el(t).classList.toggle('oculto', t !== id); });
+    window.scrollTo(0, 0);
+  }
+  function ocupado(sim) {
+    el('carregando').classList.toggle('oculto', !sim);
+    ['btnBuscar', 'btnConfirmar', 'btnBuscarDeNovo'].forEach(function (b) {
+      if (el(b)) el(b).disabled = sim;
+    });
+  }
+  function aviso(alvo, texto, tipo) {
+    el(alvo).innerHTML = texto ? '<div class="aviso ' + (tipo || 'erro') + '"></div>' : '';
+    if (texto) el(alvo).firstChild.textContent = texto;
+  }
+
+  /* ---------- busca ---------- */
+  el('btnBuscar').addEventListener('click', function () {
+    var cpf = el('cpf').value.replace(/\D/g, '');
+    var email = el('email').value.trim();
+
+    if (!cpfValido(cpf)) {
+      el('cpf').focus(); el('cpf').blur();
+      marcarErro('cpf', 'erroCpf', cpf.length !== 11
+        ? 'O CPF tem 11 números; você digitou ' + cpf.length + '.'
+        : 'Esse CPF não existe. Confira os números digitados.');
+      return;
+    }
+    if (DADOS.exigeEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      return marcarErro('email', 'erroEmail', 'Informe o e-mail usado na inscrição.');
+    }
+
+    aviso('avisoBusca', '');
+    buscar(cpf, email, false);
+  });
+
+  var ultimaBusca = null;
+  function buscar(cpf, email, forcar) {
+    ultimaBusca = { cpf: cpf, email: email };
+    ocupado(true);
+    api({ acao: 'verificar', cpf: cpf, email: email, cliente: clienteId, forcar: !!forcar })
+      .then(aoBuscar).catch(aoFalhar);
+  }
+
+  function aoBuscar(r) {
+    ocupado(false);
+    if (r.status === 'encontrado') {
+      tokenAtual = r.token;
+      el('nomeParcial').textContent = r.nomeParcial;
+      aviso('avisoConferir', r.aviso || '', 'neutro');
+      return mostrar('telaConferir');
+    }
+    if (r.status === 'ja_registrado') {
+      el('rotuloPronto').textContent = 'Presença já registrada';
+      el('nomePronto').textContent = 'às ' + r.hora;
+      el('detalhePronto').textContent = 'Você já fez o check-in nesta palestra.';
+      return mostrar('telaPronto');
+    }
+    if (r.status === 'nao_encontrado') {
+      return mostrar('telaCadastro');
+    }
+    if (r.status === 'cpf_invalido') {
+      return marcarErro('cpf', 'erroCpf', 'Esse CPF não existe. Confira os números digitados.');
+    }
+    if (r.status === 'email_invalido') {
+      return marcarErro('email', 'erroEmail', 'E-mail incompleto. Confira o endereço.');
+    }
+    if (r.status === 'bloqueado' || r.status === 'fora_da_janela' || r.status === 'erro' ||
+        r.status === 'nao_inscrito_atividade') {
+      mostrar('telaBloqueio');
+      el('textoBloqueio').textContent = r.mensagem;
+      return;
+    }
+    aviso('avisoBusca', 'Não foi possível consultar agora. Tente de novo.');
+  }
+
+  /* ---------- confirmação ---------- */
+  el('btnConfirmar').addEventListener('click', function () {
+    ocupado(true);
+    api({ acao: 'confirmar', token: tokenAtual }).then(aoRegistrar).catch(aoFalhar);
+  });
+
+  el('btnNaoSouEu').addEventListener('click', function () {
+    tokenAtual = null;
+    aviso('avisoBusca', 'Confira os dados e busque de novo.', 'neutro');
+    mostrar('telaBusca');
+  });
+
+  /* ---------- não encontrado ---------- */
+  el('btnBuscarDeNovo').addEventListener('click', function () {
+    if (!ultimaBusca) return mostrar('telaBusca');
+    buscar(ultimaBusca.cpf, ultimaBusca.email, true);
+  });
+
+  el('btnVoltar').addEventListener('click', function () { mostrar('telaBusca'); });
+
+  /* ---------- resultado ---------- */
+  function aoRegistrar(r) {
+    ocupado(false);
+    if (r.status === 'confirmado' || r.status === 'ja_registrado') {
+      el('rotuloPronto').textContent = r.status === 'confirmado'
+        ? 'Presença registrada' : 'Presença já registrada';
+      el('nomePronto').textContent = r.nomeParcial || ('às ' + r.hora);
+      el('detalhePronto').textContent =
+        (r.nomeParcial ? 'Registrada às ' + r.hora + '.' : '') + (r.aviso ? ' ' + r.aviso : '');
+      return mostrar('telaPronto');
+    }
+    if (r.status === 'erro' || r.status === 'conflito') {
+      aviso('avisoBusca', r.mensagem);
+      return mostrar('telaBusca');
+    }
+    mostrar('telaBloqueio');
+    el('textoBloqueio').textContent = r.mensagem || 'Não foi possível registrar. Procure a organização.';
+  }
+
+  el('btnOutro').addEventListener('click', function () {
+    ['cpf','email'].forEach(function (c) {
+      el(c).value = ''; el(c).classList.remove('valido', 'invalido');
+    });
+    ultimaBusca = null;
+    tokenAtual = null;
+    aviso('avisoBusca', '');
+    mostrar('telaBusca');
+    el('cpf').focus();
+  });
+
+  carregarAtividade();
+
+  function aoFalhar(e) {
+    ocupado(false);
+    aviso('avisoBusca', 'Falha de conexão. Verifique a internet e tente de novo.');
+    mostrar('telaBusca');
+  }
+</script>
+</body>
+</html>
