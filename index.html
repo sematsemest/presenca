@@ -152,8 +152,10 @@
   }
   .balcao .nome { font-size: 22px; font-weight: 600; margin: 0 0 6px; }
   .balcao .momento { font-size: 17px; margin: 0; }
-  .balcao.liberado, .balcao.repetido { background: var(--ok); color: #fff; }
-  .balcao.liberado .momento, .balcao.repetido .momento { color: #D7EFE8; }
+  .balcao.liberado { background: var(--ok); color: #fff; }
+  .balcao.liberado .momento { color: #D7EFE8; }
+  .balcao.repetido { background: #B3261E; color: #fff; }
+  .balcao.repetido .momento { color: #F7D4D1; }
   .balcao .faixa {
     display: none;
     margin: -26px -20px 18px;
@@ -272,7 +274,7 @@
 <script>
   /* ===== CONFIGURAÇÃO DA PÁGINA EXTERNA ===== */
   // URL /exec do Apps Script publicado como aplicativo web (acesso: qualquer pessoa).
-  var API_URL = 'https://script.google.com/macros/s/AKfycbyH7tgMx5hhfPnVIqkgGV8A5ag-pbBbg7VizQ89MpMDxIx_xRYOBqD-4jmTEqrzY5ZQbA/exec';
+  var API_URL = '_https://script.google.com/macros/s/AKfycbyH7tgMx5hhfPnVIqkgGV8A5ag-pbBbg7VizQ89MpMDxIx_xRYOBqD-4jmTEqrzY5ZQbA/execa';
 
   var params = new URLSearchParams(location.search);
   var DADOS = {
