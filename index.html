@@ -314,7 +314,7 @@
     // O Apps Script aceita 30 chamadas simultâneas; a 31ª é recusada. Quem é
     // recusado espera um tempo ALEATÓRIO dentro de cada faixa, para a plateia
     // não voltar toda junta e colidir de novo. Até ~45 s no total.
-    var faixas = [[800, 2000], [1500, 3500], [2500, 5500], [4000, 8000], [6000, 11000], [8000, 14000]];
+    var faixas = [[800, 2000], [1500, 3500], [2500, 5500], [4000, 8000], [6000, 11000], [8000, 14000], [8000, 14000], [8000, 14000]];
     var esperas = faixas.map(function (f) { return f[0] + Math.random() * (f[1] - f[0]); });
 
     function tentar(n) {
