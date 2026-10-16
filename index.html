@@ -324,8 +324,11 @@
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.text();
       }).then(function (txt) {
-        try { return JSON.parse(txt); }
+        var r;
+        try { r = JSON.parse(txt); }
         catch (e) { throw new Error('resposta inesperada'); }   // página de erro do Google em vez de JSON
+        if (r && r.status === 'sobrecarga') throw new Error('sobrecarga');   // o servidor pediu para tentar de novo
+        return r;
       }).catch(function (erro) {
         if (n >= esperas.length) throw erro;
         avisoCarregando('Servidor ocupado, tentando de novo…');
