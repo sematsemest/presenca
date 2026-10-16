@@ -604,6 +604,11 @@
   /* ---------- resultado ---------- */
   function aoRegistrar(r) {
     ocupado(false);
+    if (r.status === 'expirado' && ultimaBusca) {
+      // token venceu (5 min na tela de conferência): refaz a busca em silêncio.
+      // Se a presença já foi gravada, a busca devolve "já registrado".
+      return buscar(ultimaBusca.cpf, ultimaBusca.email, true);
+    }
     if (r.status === 'ocupado') {
       aviso('avisoConferir', r.mensagem, 'neutro');
       return mostrar('telaConferir');
